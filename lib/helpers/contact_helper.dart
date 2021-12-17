@@ -16,14 +16,14 @@ class ContactHelper {
 
   ContactHelper.internal();
 
-  late Database _db;
+  Database? _db;
 
   Future<Database> get db async {
     if (_db != null) {
-      return _db;
+      return _db!;
     } else {
       _db = await initDb();
-      return _db;
+      return _db!;
     }
   }
 
@@ -45,6 +45,18 @@ class ContactHelper {
     return contact;
   }
 
+  Future<int> deleteContact(int id) async {
+    Database dbContact = await db;
+    return await dbContact
+        .delete(contactTable, where: "$idColumn = ?", whereArgs: [id]);
+  }
+
+  Future<int> uptadeContact(Contact contact) async {
+    Database dbContact = await db;
+    return await dbContact.update(contactTable, contact.toMap(),
+        where: "$idColumn = ?", whereArgs: [contact.id]);
+  }
+
   Future<Contact?> getContact(int id) async {
     Database dbContact = await db;
     List<Map> maps = await dbContact.query(contactTable,
@@ -57,17 +69,41 @@ class ContactHelper {
       return null;
     }
   }
+
+  getAllContacts() async {
+    Database dbContact = await db;
+    List listMap = await dbContact.rawQuery("SELECT * FROM $contactTable");
+    List<Contact> listContact = [];
+    for (Map m in listMap) {
+      listContact.add(Contact.fromMap(m));
+    }
+
+    return listContact;
+  }
+
+  Future<int> getNumber() async {
+    Database dbContact = await db;
+    return Sqflite.firstIntValue(
+        await dbContact.rawQuery("SELECT COUNT(*) FROM $contactTable"));
+  }
+
+  Future close() async {
+    Database dbContact = await db;
+    dbContact.close();
+  }
 }
 
 // id name email phone img
 // 0  yuri @gmail  3434 /images
 
 class Contact {
-  late int id;
-  late String name;
-  late String email;
-  late String phone;
-  late String img;
+  int? id;
+  String? name;
+  String? email;
+  String? phone;
+  String? img;
+
+  Contact();
 
   Contact.fromMap(Map map) {
     id = map[idColumn];
