@@ -70,7 +70,7 @@ class ContactHelper {
     }
   }
 
-  getAllContacts() async {
+  Future<List> getAllContacts() async {
     Database dbContact = await db;
     List listMap = await dbContact.rawQuery("SELECT * FROM $contactTable");
     List<Contact> listContact = [];
@@ -101,7 +101,7 @@ class Contact {
   String? name;
   String? email;
   String? phone;
-  String? img;
+  String img = "";
 
   Contact();
 
